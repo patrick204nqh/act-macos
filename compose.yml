@@ -2,13 +2,15 @@ version: "3.9"
 
 services:
   macos:
-    image: act-macos:latest
+    # Use pre-built image from GitHub Container Registry
+    # Replace patrick204nqh with your GitHub username/organization
+    image: ghcr.io/patrick204nqh/act-macos:latest
     container_name: act-macos
 
-    # Build configuration
-    build:
-      context: .
-      dockerfile: Dockerfile
+    # Build configuration (uncomment to build locally instead of pulling from registry)
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile
 
     # Environment variables
     environment:

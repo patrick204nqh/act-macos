@@ -56,6 +56,32 @@ sudo modprobe kvm_amd    # For AMD CPUs
 - Docker Desktop includes necessary virtualization support
 - Ensure virtualization is enabled in your system BIOS/UEFI
 
+## GitHub Container Registry Setup
+
+This project uses GitHub Container Registry (ghcr.io) to store and distribute Docker images.
+
+### Make Your Package Public (Optional)
+
+After the first successful build:
+
+1. Go to your GitHub profile → Packages
+2. Find the `act-macos` package
+3. Click on Package settings
+4. Scroll down to "Danger Zone"
+5. Click "Change visibility" → "Public"
+
+This allows anyone to pull your image without authentication.
+
+### Authentication (for private packages)
+
+If your package is private, users need to authenticate:
+
+```bash
+# Create a GitHub Personal Access Token with read:packages scope
+# Then login to GitHub Container Registry
+echo $GITHUB_TOKEN | docker login ghcr.io -u <username> --password-stdin
+```
+
 ## Quick Start
 
 ### 1. Clone the Repository
@@ -65,7 +91,15 @@ git clone <your-repo-url>
 cd act-macos
 ```
 
-### 2. Build the Image
+### 2. Pull or Build the Image
+
+**Option A: Pull from GitHub Container Registry (recommended)**
+```bash
+# Replace patrick204nqh with your GitHub username/organization
+docker pull ghcr.io/patrick204nqh/act-macos:latest
+```
+
+**Option B: Build locally**
 
 Using the build script:
 ```bash
@@ -79,10 +113,12 @@ docker compose build
 
 Or using Docker directly:
 ```bash
-docker build -t act-macos:latest .
+docker build -t ghcr.io/patrick204nqh/act-macos:latest .
 ```
 
 ### 3. Run the Container
+
+**Before running**, update `compose.yml` and replace `patrick204nqh` with your GitHub username/organization.
 
 Using Docker Compose (recommended):
 ```bash
@@ -91,6 +127,7 @@ docker compose up -d
 
 Or using Docker directly:
 ```bash
+# Replace patrick204nqh with your GitHub username/organization
 docker run -d \
   --name act-macos \
   --device=/dev/kvm \
@@ -100,7 +137,7 @@ docker run -d \
   -p 8006:8006 \
   -v $(pwd)/storage:/storage \
   -v $(pwd)/shared:/shared \
-  act-macos:latest
+  ghcr.io/patrick204nqh/act-macos:latest
 ```
 
 ### 4. Access macOS
@@ -310,6 +347,30 @@ To reset:
 docker compose down
 rm -rf storage/
 docker compose up -d
+```
+
+## Automated Builds
+
+This repository includes GitHub Actions workflow that automatically builds and pushes images to GitHub Container Registry when:
+
+- Code is pushed to `main` or `develop` branches
+- A tag matching `v*` is pushed (e.g., `v1.0.0`)
+- Manually triggered via workflow_dispatch
+
+### Tags Generated
+
+- `main` → `latest`
+- `develop` → `develop`
+- `v1.2.3` → `1.2.3`, `1.2`, `1`, `latest` (for releases)
+- Pull requests → `pr-123`
+
+### Manual Trigger
+
+```bash
+# Via GitHub UI: Actions → Build and Push Docker Image → Run workflow
+
+# Or using GitHub CLI
+gh workflow run build-and-push.yml -f tag=custom-tag
 ```
 
 ## Development

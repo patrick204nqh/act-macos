@@ -12,6 +12,7 @@ NC='\033[0m' # No Color
 # Default values
 IMAGE_NAME="act-macos"
 IMAGE_TAG="latest"
+REGISTRY=""
 PLATFORM=""
 
 # Parse command line arguments
@@ -25,6 +26,10 @@ while [[ $# -gt 0 ]]; do
             IMAGE_NAME="$2"
             shift 2
             ;;
+        -r|--registry)
+            REGISTRY="$2"
+            shift 2
+            ;;
         --platform)
             PLATFORM="--platform $2"
             shift 2
@@ -33,15 +38,18 @@ while [[ $# -gt 0 ]]; do
             echo "Usage: $0 [OPTIONS]"
             echo ""
             echo "Options:"
-            echo "  -n, --name NAME       Image name (default: act-macos)"
-            echo "  -t, --tag TAG         Image tag (default: latest)"
-            echo "  --platform PLATFORM   Target platform (e.g., linux/amd64)"
-            echo "  -h, --help            Show this help message"
+            echo "  -n, --name NAME         Image name (default: act-macos)"
+            echo "  -t, --tag TAG           Image tag (default: latest)"
+            echo "  -r, --registry REGISTRY Registry prefix (e.g., ghcr.io/username)"
+            echo "  --platform PLATFORM     Target platform (e.g., linux/amd64)"
+            echo "  -h, --help              Show this help message"
             echo ""
             echo "Examples:"
-            echo "  $0                           # Build with defaults"
-            echo "  $0 -t v1.0.0                # Build with custom tag"
-            echo "  $0 --platform linux/amd64   # Build for specific platform"
+            echo "  $0                                           # Build locally: act-macos:latest"
+            echo "  $0 -t v1.0.0                                # Build: act-macos:v1.0.0"
+            echo "  $0 -r ghcr.io/username                      # Build: ghcr.io/username/act-macos:latest"
+            echo "  $0 -r ghcr.io/username -t v1.0.0           # Build: ghcr.io/username/act-macos:v1.0.0"
+            echo "  $0 --platform linux/amd64                   # Build for specific platform"
             exit 0
             ;;
         *)
@@ -51,7 +59,12 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-FULL_IMAGE_NAME="${IMAGE_NAME}:${IMAGE_TAG}"
+# Build full image name
+if [ -n "$REGISTRY" ]; then
+    FULL_IMAGE_NAME="${REGISTRY}/${IMAGE_NAME}:${IMAGE_TAG}"
+else
+    FULL_IMAGE_NAME="${IMAGE_NAME}:${IMAGE_TAG}"
+fi
 
 echo -e "${GREEN}======================================"
 echo "Building act-macos Docker Image"
@@ -97,18 +110,31 @@ if [ $? -eq 0 ]; then
     echo -e "Image: ${YELLOW}${FULL_IMAGE_NAME}${NC}"
     echo ""
     echo -e "${GREEN}Next steps:${NC}"
-    echo "1. Run with Docker Compose:"
-    echo -e "   ${YELLOW}docker-compose up -d${NC}"
+
+    if [ -n "$REGISTRY" ]; then
+        echo "1. Push to registry:"
+        echo -e "   ${YELLOW}docker push ${FULL_IMAGE_NAME}${NC}"
+        echo ""
+        echo "2. Update compose.yml with:"
+        echo -e "   ${YELLOW}image: ${FULL_IMAGE_NAME}${NC}"
+        echo ""
+        echo "3. Run with Docker Compose:"
+        echo -e "   ${YELLOW}docker compose up -d${NC}"
+    else
+        echo "1. Run with Docker Compose:"
+        echo -e "   ${YELLOW}docker compose up -d${NC}"
+        echo ""
+        echo "2. Or run manually:"
+        echo -e "   ${YELLOW}docker run -d --name act-macos \\${NC}"
+        echo -e "   ${YELLOW}  --device=/dev/kvm \\${NC}"
+        echo -e "   ${YELLOW}  --cap-add NET_ADMIN \\${NC}"
+        echo -e "   ${YELLOW}  -p 5900:5900 -p 8006:8006 \\${NC}"
+        echo -e "   ${YELLOW}  -v \$(pwd)/storage:/storage \\${NC}"
+        echo -e "   ${YELLOW}  ${FULL_IMAGE_NAME}${NC}"
+    fi
+
     echo ""
-    echo "2. Or run manually:"
-    echo -e "   ${YELLOW}docker run -d --name act-macos \\${NC}"
-    echo -e "   ${YELLOW}  --device=/dev/kvm \\${NC}"
-    echo -e "   ${YELLOW}  --cap-add NET_ADMIN \\${NC}"
-    echo -e "   ${YELLOW}  -p 5900:5900 -p 8006:8006 \\${NC}"
-    echo -e "   ${YELLOW}  -v \$(pwd)/storage:/storage \\${NC}"
-    echo -e "   ${YELLOW}  ${FULL_IMAGE_NAME}${NC}"
-    echo ""
-    echo "3. Access via VNC on port 5900 or web browser at http://localhost:8006"
+    echo "Access via VNC on port 5900 or web browser at http://localhost:8006"
 else
     echo ""
     echo -e "${RED}======================================"
