@@ -1,0 +1,34 @@
+# Storage and runtime data
+storage/
+shared/
+
+# Logs
+*.log
+logs/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Environment files
+.env
+.env.local
+
+# Docker volumes
+volumes/
+
+# Build artifacts
+dist/
+build/

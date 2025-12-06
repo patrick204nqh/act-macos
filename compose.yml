@@ -1,0 +1,56 @@
+version: "3.9"
+
+services:
+  macos:
+    image: act-macos:latest
+    container_name: act-macos
+
+    # Build configuration
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    # Environment variables
+    environment:
+      VERSION: "15"           # macOS version (11-15)
+      DISK_SIZE: "128G"       # Virtual disk size
+      RAM_SIZE: "8G"          # RAM allocation
+      CPU_CORES: "4"          # CPU cores
+      DHCP: "Y"               # Enable DHCP
+
+    # Device access for KVM virtualization
+    devices:
+      - /dev/kvm
+      - /dev/net/tun
+
+    # Required capabilities
+    cap_add:
+      - NET_ADMIN
+
+    # Ports
+    ports:
+      - "5900:5900"   # VNC - Connect with VNC client
+      - "8006:8006"   # Web viewer - Access via browser
+      - "2375:2375"   # Docker daemon (optional, for remote access)
+
+    # Volumes
+    volumes:
+      - ./storage:/storage           # Persistent storage for macOS disk
+      - ./shared:/shared             # Shared folder between host and container
+
+    # Restart policy
+    restart: unless-stopped
+
+    # Optional: Use host network for better performance
+    # network_mode: host
+
+    # Security options
+    security_opt:
+      - apparmor:unconfined
+
+    # Resource limits (optional, adjust as needed)
+    # deploy:
+    #   resources:
+    #     limits:
+    #       memory: 8G
+    #       cpus: '4'
