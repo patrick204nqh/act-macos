@@ -1,4 +1,4 @@
-FROM dockur/macos:latest
+FROM dockurr/macos:latest
 
 # Metadata
 LABEL maintainer="act-macos"
@@ -18,7 +18,6 @@ ENV ACT_VERSION="0.2.68" \
 
 # Copy additional setup scripts
 COPY scripts/ /opt/scripts/
-RUN chmod +x /opt/scripts/*.sh
 
 # Volume for persistent storage (including Docker data)
 VOLUME ["/storage"]
