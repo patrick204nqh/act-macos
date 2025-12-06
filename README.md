@@ -7,8 +7,10 @@ macOS Docker container for running [act](https://github.com/nektos/act) (GitHub 
 - macOS 15 (Sequoia) running in Docker
 - KVM/QEMU virtualization
 - VNC and web access
+- Pre-installed development tools (git, curl, wget, jq, etc.)
 - Docker-in-Docker for act
 - Persistent storage
+- Compatible with act (GitHub Actions locally)
 
 ## Prerequisites
 
@@ -38,6 +40,26 @@ sudo modprobe kvm_amd    # AMD
 ```bash
 docker compose up -d
 ```
+
+### Using with act
+
+This image can be used as a runner for [act](https://github.com/nektos/act) to test GitHub Actions locally:
+
+```bash
+# In your project directory
+act -P macos-latest=ghcr.io/patrick204nqh/act-macos:latest
+
+# Or create .actrc file
+echo "-P macos-latest=ghcr.io/patrick204nqh/act-macos:latest" > ~/.actrc
+act
+```
+
+**Pre-installed Tools:**
+- Git, curl, wget, jq
+- Node.js, npm, yarn
+- Python 3 with pip
+- Build tools (gcc, make, etc.)
+- SSH client, gnupg
 
 ### 2. Access macOS
 

@@ -4,6 +4,33 @@ FROM dockurr/macos:latest
 LABEL maintainer="act-macos"
 LABEL description="macOS Docker container optimized for act (GitHub Actions locally) with docker-in-docker support"
 
+# Install essential development tools for GitHub Actions compatibility
+USER root
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git \
+    curl \
+    wget \
+    ca-certificates \
+    bash \
+    jq \
+    unzip \
+    zip \
+    tar \
+    gzip \
+    sudo \
+    openssh-client \
+    gnupg \
+    nodejs \
+    npm \
+    python3 \
+    python3-pip \
+    build-essential \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install GitHub Actions runner dependencies
+RUN npm install -g yarn
+
 # Environment variables for macOS configuration
 ENV VERSION="15" \
     DISK_SIZE="128G" \
