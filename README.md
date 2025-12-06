@@ -12,11 +12,13 @@ macOS Docker container for running [act](https://github.com/nektos/act) (GitHub 
 
 ## Prerequisites
 
-- **CPU**: x86_64 with virtualization (Intel VT-x or AMD-V)
+- **CPU**: x86_64 (Intel/AMD) or ARM64 (Apple Silicon) with virtualization
 - **RAM**: 8GB minimum (16GB+ recommended)
 - **Disk**: 150GB free space
-- **OS**: Linux with KVM or Windows 11 with Docker Desktop
+- **OS**: Linux with KVM, macOS, or Windows 11 with Docker Desktop
 - **Software**: Docker Engine 20.10+ and Docker Compose 2.0+
+
+> **Note**: Images are available for both `linux/amd64` and `linux/arm64` platforms. Docker will automatically pull the correct architecture for your system.
 
 ### Enable KVM (Linux only)
 
@@ -34,7 +36,6 @@ sudo modprobe kvm_amd    # AMD
 ### 1. Pull and Run
 
 ```bash
-# Update compose.yml with your GitHub username
 docker compose up -d
 ```
 
